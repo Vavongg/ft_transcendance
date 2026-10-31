@@ -1,0 +1,90 @@
+// Configuration de la connexion
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+// Table User pour PostgreSQL
+model User {
+    id        Int      @id @default(autoincrement())
+    email     String   @unique
+    username  String   @unique
+    password  String
+    avatar    String?  @default("default-avatar.png")
+    isOnline  Boolean  @default(false)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    sentFriendRequests     FriendRequest[] @relation("sentFriendRequests")
+    receivedFriendRequests FriendRequest[] @relation("receivedFriendRequests")
+    blockedUsers            BlockedUserStatus[]   @relation("blockerUsers")
+    blockedByUsers           BlockedUserStatus[]   @relation("blockedByUsers")
+
+    gamesAsWinner Game[] @relation("Winner")
+    gamesAsLoser Game[] @relation("Loser")
+
+    channels Channel[] @relation("ChannelMembers")
+    messages Message[] @relation("MessageSender")
+}
+
+
+model FriendRequest{
+    id         Int      @id @default(autoincrement())
+    senderId   Int
+    receiverId Int
+    status     FriendRequestStatus @default(PENDING)
+
+    sender   User @relation("sentFriendRequests", fields: [senderId], references: [id])
+    receiver User @relation("receivedFriendRequests", fields: [receiverId], references: [id])
+}
+
+enum FriendRequestStatus {
+    PENDING
+    ACCEPTED
+    REJECTED
+}
+
+model BlockedUserStatus {
+    id         Int      @id @default(autoincrement())
+    blockerId  Int
+    blockedId  Int
+
+    blocker User @relation("blockerUsers", fields: [blockerId], references: [id])
+    blocked User @relation("blockedByUsers", fields: [blockedId], references: [id])
+}
+
+model Game {
+    id        Int      @id @default(autoincrement())
+    winnerId  Int
+    loserId   Int
+    createdAt DateTime @default(now())
+
+    winner User @relation("Winner", fields: [winnerId], references: [id])
+    loser  User @relation("Loser", fields: [loserId], references: [id])
+}
+
+model Channel {
+    id        Int      @id @default(autoincrement())
+    name      String   @unique
+    isPrivate Boolean  @default(true)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    members User[] @relation("ChannelMembers")
+    messages Message[] @relation("ChannelMessages")
+}
+
+model Message {
+    id        Int      @id @default(autoincrement())
+    content   String
+    senderId  Int
+    channelId Int
+    createdAt DateTime @default(now())
+
+    sender  User    @relation("MessageSender", fields: [senderId], references: [id])
+    channel Channel @relation("ChannelMessages", fields: [channelId], references: [id])
+}

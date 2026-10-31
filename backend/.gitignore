@@ -32,8 +32,10 @@ Thumbs.db
 .settings/
 *.sublime-workspace
 
-# IDE - VSCode
-.vscode/*
+# Exclure tout le contenu de .vscode
+.vscode/
+
+# Ne PAS ignorer les fichiers de configuration partagés
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
@@ -64,3 +66,9 @@ node_modules/
 
 #prisma
 .prisma/
+
+#SKILL.md
+.agents/
+.claude/
+.cursor/
+.devin/

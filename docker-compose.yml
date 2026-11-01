@@ -1,16 +1,71 @@
-
 services:
-  database:
+  postgres:
     image: postgres:15-alpine
-    container_name: database
+    container_name: postgres
+    restart: always
     environment:
-      POSTGRES_USER: username
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: database_SQL
+      POSTGRES_USER: ${POSTGRES_USER:-transcendence}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-transcendence_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-transcendence_db}
     ports:
       - "5432:5432"
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - transcendence_net
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend
+    restart: always
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-transcendence}:${POSTGRES_PASSWORD:-transcendence_pass}@postgres:5432/${POSTGRES_DB:-transcendence_db}
+      PORT: 3000
+      JWT_SECRET: ${JWT_SECRET:-super_secret_jwt_key}
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    networks:
+      - transcendence_net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    restart: always
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    networks:
+      - transcendence_net
+
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: nginx
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - transcendence_net
 
 volumes:
-  db_data:
+  pgdata:
+
+networks:
+  transcendence_net:
+    driver: bridge

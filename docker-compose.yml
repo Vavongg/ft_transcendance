@@ -7,12 +7,15 @@ services:
       POSTGRES_USER: ${POSTGRES_USER:-transcendence}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-transcendence_pass}
       POSTGRES_DB: ${POSTGRES_DB:-transcendence_db}
-    ports:
-      - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     networks:
       - transcendence_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-transcendence} -d ${POSTGRES_DB:-transcendence_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   backend:
     build:
@@ -27,10 +30,9 @@ services:
     volumes:
       - ./backend:/app
       - /app/node_modules
-    ports:
-      - "3000:3000"
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - transcendence_net
 
@@ -43,8 +45,6 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
-    ports:
-      - "5173:5173"
     networks:
       - transcendence_net
 

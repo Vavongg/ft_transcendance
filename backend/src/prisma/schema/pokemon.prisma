@@ -4,4 +4,15 @@ model Pokemon {
     type  String
     level Int
     stats Json?
+    moves Move[] @relation("PokemonMoves")
+}
+
+model Move {
+    id          Int    @id @default(autoincrement())
+    name        String @unique
+    type        String
+    power       Int?
+    accuracy    Int?
+    pp          Int?
+    pokemons Pokemon[] @relation("PokemonMoves")
 }

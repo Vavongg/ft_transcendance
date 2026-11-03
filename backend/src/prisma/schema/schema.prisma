@@ -1,0 +1,10 @@
+// Configuration de la connexion
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+// Générateur de client Prisma : traduction en TS
+generator client {
+    provider = "prisma-client-js"
+}

@@ -1,0 +1,9 @@
+model Game {
+    id        Int      @id @default(autoincrement())
+    winnerId  Int
+    loserId   Int
+    createdAt DateTime @default(now())
+
+    winner User @relation("Winner", fields: [winnerId], references: [id])
+    loser  User @relation("Loser", fields: [loserId], references: [id])
+}

@@ -1,14 +1,3 @@
-// Configuration de la connexion
-datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
-}
-
-generator client {
-    provider = "prisma-client-js"
-}
-
-// Table User pour PostgreSQL
 model User {
     id        Int      @id @default(autoincrement())
     email     String   @unique
@@ -30,7 +19,6 @@ model User {
     channels Channel[] @relation("ChannelMembers")
     messages Message[] @relation("MessageSender")
 }
-
 
 model FriendRequest{
     id         Int      @id @default(autoincrement())
@@ -55,36 +43,4 @@ model BlockedUserStatus {
 
     blocker User @relation("blockerUsers", fields: [blockerId], references: [id])
     blocked User @relation("blockedByUsers", fields: [blockedId], references: [id])
-}
-
-model Game {
-    id        Int      @id @default(autoincrement())
-    winnerId  Int
-    loserId   Int
-    createdAt DateTime @default(now())
-
-    winner User @relation("Winner", fields: [winnerId], references: [id])
-    loser  User @relation("Loser", fields: [loserId], references: [id])
-}
-
-model Channel {
-    id        Int      @id @default(autoincrement())
-    name      String   @unique
-    isPrivate Boolean  @default(true)
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-
-    members User[] @relation("ChannelMembers")
-    messages Message[] @relation("ChannelMessages")
-}
-
-model Message {
-    id        Int      @id @default(autoincrement())
-    content   String
-    senderId  Int
-    channelId Int
-    createdAt DateTime @default(now())
-
-    sender  User    @relation("MessageSender", fields: [senderId], references: [id])
-    channel Channel @relation("ChannelMessages", fields: [channelId], references: [id])
 }

@@ -1,0 +1,21 @@
+model Channel {
+    id        Int      @id @default(autoincrement())
+    name      String   @unique
+    isPrivate Boolean  @default(true)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    members User[] @relation("ChannelMembers")
+    messages Message[] @relation("ChannelMessages")
+}
+
+model Message {
+    id        Int      @id @default(autoincrement())
+    content   String
+    senderId  Int
+    channelId Int
+    createdAt DateTime @default(now())
+
+    sender  User    @relation("MessageSender", fields: [senderId], references: [id])
+    channel Channel @relation("ChannelMessages", fields: [channelId], references: [id])
+}

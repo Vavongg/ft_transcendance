@@ -6,6 +6,9 @@
 /test
 .oxlintrc.json
 
+# Ignore all .gitattributes files
+.gitattributes
+
 # TypeScript build cache
 *.tsbuildinfo
 
@@ -35,7 +38,7 @@ Thumbs.db
 .settings/
 *.sublime-workspace
 
-# Exclure tout le contenu de .vscode
+# Ignore /.vscode
 .vscode/
 
 # Ne PAS ignorer les fichiers de configuration partagés

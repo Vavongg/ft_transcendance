@@ -1,5 +1,6 @@
-.env
-backend/node_modules
-frontend/node_modules
-backend/dist
+**/.env
+**/node_modules
+**/dist
 *.tsbuildinfo
+**/gitattributes
+**/.vscode/*

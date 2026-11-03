@@ -6,23 +6,26 @@ import {
   OnApplicationBootstrap,
 } from '@nestjs/common';
 
-import {
-  PrismaService,
-} from '../prisma/prisma.service'; // Ajustez le chemin relatif vers votre prisma.service
+import { PrismaService } from '../prisma/prisma.service';
+import { MoveImportService } from './api-moves';
 
 @Injectable()
 export class ApiPokemonService implements OnApplicationBootstrap {
   private readonly api = new MainClient();
   private readonly logger = new Logger(ApiPokemonService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly moveImportService: MoveImportService,
+  ) {}
 
   async onApplicationBootstrap() {
-    await this.listGen1Pokemons();
+    await this.moveImportService.importMoves();
+    await this.importGen1Pokemons();
   }
 
   // Fonction de récupération && d'insertion des Pokémon
-  async listGen1Pokemons() {
+  async importGen1Pokemons() {
     let count = 0;
     const maxPokemons = 151;
 
@@ -35,6 +38,16 @@ export class ApiPokemonService implements OnApplicationBootstrap {
         if (count >= maxPokemons) {
           break;
         }
+        
+        // Filtre les attaques de la Gen1
+        const gen1Moves = pokemon.moves.filter((moveEntry) =>
+          moveEntry.version_group_details.some((detail) =>
+            ['red-blue', 'yellow'].includes(detail.version_group.name),
+          ),
+        );
+
+        // Extrait les noms uniques des attaques de la Gen1
+        const moveNames = [...new Set(gen1Moves.map((m) => m.move.name))];
 
         // Ajouter chaque Pokémon dans la base de données via Prisma
         await this.prisma.pokemon.upsert({
@@ -46,16 +59,19 @@ export class ApiPokemonService implements OnApplicationBootstrap {
             type: pokemon.types.map((t) => t.type.name).join(', '),
             level: 100,
             stats: pokemon.stats as any,
+            moves: {
+              connect: moveNames.map((moveName) => ({ name: moveName })),
+            },
           },
         });
 
-        this.logger.log(`[${count + 1}] Added Pokemon : ${ pokemon.name}`);
+        this.logger.log(`[${count + 1}] Added Pokemon : ${pokemon.name}`);
         count++;
       }
 
-      this.logger.log('Gen1 Importation successful !');
+      this.logger.log('[ApiPokemonService] Gen1 Importation successful !');
     } catch (error) {
-      this.logger.error("Error during Gen1 import", error);
+      this.logger.error('[ApiPokemonService] Error during Gen1 import', error);
     }
   }
 }

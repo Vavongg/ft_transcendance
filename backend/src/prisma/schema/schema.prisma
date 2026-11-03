@@ -7,4 +7,5 @@ datasource db {
 // Générateur de client Prisma : traduction en TS
 generator client {
     provider = "prisma-client-js"
+    previewFeatures = ["prismaSchemaFolder"]
 }

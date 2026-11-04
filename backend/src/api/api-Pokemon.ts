@@ -38,16 +38,9 @@ export class ApiPokemonService implements OnApplicationBootstrap {
         if (count >= maxPokemons) {
           break;
         }
-        
-        // Filtre les attaques de la Gen1
-        const gen1Moves = pokemon.moves.filter((moveEntry) =>
-          moveEntry.version_group_details.some((detail) =>
-            ['red-blue', 'yellow'].includes(detail.version_group.name),
-          ),
-        );
 
-        // Extrait les noms uniques des attaques de la Gen1
-        const moveNames = [...new Set(gen1Moves.map((m) => m.move.name))];
+        // Récupérer uniquement les attaques de du pokémon concerné
+        const PokemonMoveNames = pokemon.moves.map((m) => m.move.name);
 
         // Ajouter chaque Pokémon dans la base de données via Prisma
         await this.prisma.pokemon.upsert({
@@ -60,12 +53,12 @@ export class ApiPokemonService implements OnApplicationBootstrap {
             level: 100,
             stats: pokemon.stats as any,
             moves: {
-              connect: moveNames.map((moveName) => ({ name: moveName })),
+              connect: PokemonMoveNames.map((moveName) => ({ name: moveName })),
             },
           },
         });
 
-        this.logger.log(`[${count + 1}] Added Pokemon : ${pokemon.name}`);
+        //this.logger.log(`[${count + 1}] Added Pokemon : ${pokemon.name}`);
         count++;
       }
 

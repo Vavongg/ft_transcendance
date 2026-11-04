@@ -1,18 +1,44 @@
 model Pokemon {
     id    Int    @id @default(autoincrement())
     name  String @unique
+    nameFR String?
+    nameDE String?
     type  String
     level Int
     stats Json?
+
+    gender GenderStatus[] @relation(fields: [genderId], references: [id])
+    nature Nature? @relation(fields: [natureId], references: [id])
+    ability Ability[] @relation("PokemonAbilities")
     moves Move[] @relation("PokemonMoves")
 }
 
-model Move {
-    id          Int    @id @default(autoincrement())
-    name        String @unique
-    type        String
-    power       Int?
-    accuracy    Int?
-    pp          Int?
-    pokemons Pokemon[] @relation("PokemonMoves")
+enum Gender {
+    MALE
+    FEMALE
+    GENDERLESS
+}
+
+model GenderRatio {
+    id     Gender? @unique
+    pokemon Pokemon @relation(fields: [pokemonId], references: [id])
+    ratio Float
+    pokemonId Int
+}
+
+model Nature {
+    id   Int    @id @default(autoincrement())
+    name String @unique
+    pokemons Pokemon[] @relation(fields: [pokemonId], references: [id])
+    pokemonId Int
+    namesFR String?
+    namesDE String?
+}
+
+model Ability {
+    id   Int    @id @default(autoincrement())
+    name String @unique
+    nameFR String?
+    nameDE String?
+    pokemons Pokemon[] @relation("PokemonAbilities")
 }

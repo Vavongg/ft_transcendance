@@ -24,15 +24,15 @@ enum CategoryClass {
 model Ailment {
     id        Int    @id @default(autoincrement())
     name      String @unique
-    nameFR    String?
-    nameDE    String?
+    //nameFR    String?
+    //nameDE    String?
     movesFrom Move[] @relation("AilmentMoves")
 }
 
-model MoveStatAffectSet {
-    id             Int    @id @default(autoincrement())
-    move           Move   @relation(fields: [moveId], references: [id])
-    moveId         Int
-    statAffects    Json?
-    ailmentAffects Json?
-}
+// model MoveStatAffectSet {
+//     id             Int    @id @default(autoincrement())
+//     moves           Move[]   @relation("MoveStatAffectSet")
+//     moveId         Int
+//     statAffects    Json?
+//     ailmentAffects Json?
+// }

@@ -31,10 +31,20 @@ export class MoveImportService implements OnApplicationBootstrap {
         const moveDetails = await this.moveClient.getMoveByName(
           moveSummary.name,
         );
+
         //'generation-i' = génération 1
         if (moveDetails.generation?.name !== 'generation-i') {
           continue; // Ignore cette attaque et passe à la suivante
         }
+
+        // // Récupérer le FR
+        // const frFlavorTextEntry = moveDetails.flavor_text_entries.find(
+        //   (entry) => entry.language.name === 'fr',
+        // );
+        // // Nettoyer les caractères spéciaux et sauts de texte etc.
+        // const cleanDescription = frFlavorTextEntry
+        //   ? frFlavorTextEntry.flavor_text.replace(/[\n\f\r]/g, ' ')
+        //   : null;
 
         // Insertion de l'attaque en base de données
         await this.prisma.move.upsert({
@@ -46,6 +56,7 @@ export class MoveImportService implements OnApplicationBootstrap {
             power: moveDetails.power ?? null,
             accuracy: moveDetails.accuracy ?? null,
             pp: moveDetails.pp ?? null,
+            //description: cleanDescription,
           },
         });
 

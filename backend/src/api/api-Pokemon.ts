@@ -9,6 +9,8 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { MoveImportService } from './api-moves';
 
+import
+
 @Injectable()
 export class ApiPokemonService implements OnApplicationBootstrap {
   private readonly api = new MainClient();
@@ -39,8 +41,21 @@ export class ApiPokemonService implements OnApplicationBootstrap {
           break;
         }
 
+        // Récupérer les informations de l'espèce: base_happiness, gender_rate, etc.
+        const species = await this.api.pokemon.getPokemonSpeciesByName(
+          pokemon.name,
+        );
+
+        const genderRate = species.gender_rate;
+        const ratioValue = genderRate === -1 ? 0 : genderRate / 8;
+
+        const baseHappinessValue = species.base_happiness ?? 70;
+
+        const getStats = (statName: string) =>
+          pokemon.stats.find((s) => s.stat.name === statName)?.base_stat ?? 0;
+
         // Récupérer uniquement les attaques de du pokémon concerné
-        const PokemonMoveNames = pokemon.moves.map((m) => m.move.name);
+        const MoveNames = pokemon.moves.map((m) => m.move.name);
 
         // Ajouter chaque Pokémon dans la base de données via Prisma
         await this.prisma.pokemon.upsert({
@@ -51,9 +66,36 @@ export class ApiPokemonService implements OnApplicationBootstrap {
             name: pokemon.name,
             type: pokemon.types.map((t) => t.type.name).join(', '),
             level: 100,
-            stats: pokemon.stats as any,
+
+            //Base stats
+            hp: getStats('hp'),
+            atk: getStats('attack'),
+            def: getStats('defense'),
+            spAtk: getStats('special-attack'),
+            spDef: getStats('special-defense'),
+            speed: getStats('speed'),
+
+            //Gender ratio
+            ratio: ratioValue, 
+
+            //Base happiness
+            baseHappiness: baseHappinessValue, 
+
             moves: {
-              connect: PokemonMoveNames.map((moveName) => ({ name: moveName })),
+              connect: MoveNames.map((moveName) => ({ name: moveName })),
+            },
+
+            sprite: {
+              create: {
+                front_default: pokemon.sprites.front_default,
+                front_shiny: pokemon.sprites.front_shiny,
+                front_female: pokemon.sprites.front_female,
+                front_shiny_female: pokemon.sprites.front_shiny_female,
+                back_default: pokemon.sprites.back_default,
+                back_shiny: pokemon.sprites.back_shiny,
+                back_female: pokemon.sprites.back_female,
+                back_shiny_female: pokemon.sprites.back_shiny_female,
+              },
             },
           },
         });

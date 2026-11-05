@@ -18,6 +18,7 @@ model Nature {
     natureName   String   @unique
     decreasedStat String? //Provisoire pour le `?`
     increasedStat String? //Provisoire pour le `?`
+    //names
 }
 
 // model Stat {

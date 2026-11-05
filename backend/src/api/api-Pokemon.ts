@@ -7,9 +7,8 @@ import {
 } from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
+import { AbilityImportService } from './api-abilities';
 import { MoveImportService } from './api-moves';
-
-import
 
 @Injectable()
 export class ApiPokemonService implements OnApplicationBootstrap {
@@ -19,10 +18,12 @@ export class ApiPokemonService implements OnApplicationBootstrap {
   constructor(
     private readonly prisma: PrismaService,
     private readonly moveImportService: MoveImportService,
+    private readonly abilityImportService: AbilityImportService,
   ) {}
 
   async onApplicationBootstrap() {
     await this.moveImportService.importMoves();
+    await this.abilityImportService.importAbility();
     await this.importGen1Pokemons();
   }
 
@@ -32,6 +33,7 @@ export class ApiPokemonService implements OnApplicationBootstrap {
     const maxPokemons = 151;
 
     try {
+      this.logger.log('[ApiPokemonService] Starting Pokemon import...');
       // Parcourt toutes les pages de la liste des Pokémon en utilisant la pagination
       for await (const pokemon of this.api.pokemon.paginate('listPokemons', {
         pageSize: 50,
@@ -54,8 +56,41 @@ export class ApiPokemonService implements OnApplicationBootstrap {
         const getStats = (statName: string) =>
           pokemon.stats.find((s) => s.stat.name === statName)?.base_stat ?? 0;
 
-        // Récupérer uniquement les attaques de du pokémon concerné
+        // Récupérer uniquement les talents du pokemon concerné
+        const abilityNames = pokemon.abilities.map((a) => a.ability.name);
+
+        // Vérifier que les talents existent dans la base
+        const existingAbility = await this.prisma.move.findMany({
+          where: { name: { in: abilityNames } },
+          select: { name: true },
+        });
+
+        const addingAbility = existingAbility.map((a) => a.name);
+
+        // Récupérer uniquement les attaques du pokémon concerné
         const MoveNames = pokemon.moves.map((m) => m.move.name);
+
+        // Vérifier que les attaques existent dans la base
+        const existingMoves = await this.prisma.move.findMany({
+          where: { name: { in: MoveNames } },
+          select: { name: true },
+        });
+
+        const addingMoves = existingMoves.map((m) => m.name);
+
+        //Import des Sprites
+        const createSprite = await this.prisma.pokemonSprite.create({
+          data: {
+            front_default: pokemon.sprites.front_default,
+            front_shiny: pokemon.sprites.front_shiny,
+            front_female: pokemon.sprites.front_female,
+            front_shiny_female: pokemon.sprites.front_shiny_female,
+            back_default: pokemon.sprites.back_default,
+            back_shiny: pokemon.sprites.back_shiny,
+            back_female: pokemon.sprites.back_female,
+            back_shiny_female: pokemon.sprites.back_shiny_female,
+          },
+        });
 
         // Ajouter chaque Pokémon dans la base de données via Prisma
         await this.prisma.pokemon.upsert({
@@ -76,27 +111,20 @@ export class ApiPokemonService implements OnApplicationBootstrap {
             speed: getStats('speed'),
 
             //Gender ratio
-            ratio: ratioValue, 
+            ratio: ratioValue,
 
             //Base happiness
-            baseHappiness: baseHappinessValue, 
+            baseHappiness: baseHappinessValue,
+
+            ability: {
+              connect: addingAbility.map((abilityNames) => ({name: abilityNames})),
+            },
 
             moves: {
-              connect: MoveNames.map((moveName) => ({ name: moveName })),
+              connect: addingMoves.map((moveName) => ({ name: moveName })),
             },
 
-            sprite: {
-              create: {
-                front_default: pokemon.sprites.front_default,
-                front_shiny: pokemon.sprites.front_shiny,
-                front_female: pokemon.sprites.front_female,
-                front_shiny_female: pokemon.sprites.front_shiny_female,
-                back_default: pokemon.sprites.back_default,
-                back_shiny: pokemon.sprites.back_shiny,
-                back_female: pokemon.sprites.back_female,
-                back_shiny_female: pokemon.sprites.back_shiny_female,
-              },
-            },
+            spriteId: createSprite.id,
           },
         });
 

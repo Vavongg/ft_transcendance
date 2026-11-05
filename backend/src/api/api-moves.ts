@@ -33,9 +33,9 @@ export class MoveImportService implements OnApplicationBootstrap {
         );
 
         //'generation-i' = génération 1
-        if (moveDetails.generation?.name !== 'generation-i') {
-          continue; // Ignore cette attaque et passe à la suivante
-        }
+        // if (moveDetails.generation?.name !== 'generation-i') {
+        //   continue; // Ignore cette attaque et passe à la suivante
+        // }
 
         // // Récupérer le FR
         // const frFlavorTextEntry = moveDetails.flavor_text_entries.find(

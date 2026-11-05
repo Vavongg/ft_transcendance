@@ -14,7 +14,7 @@ model Pokemon {
     speed Int @default(0)
 
     // Femelle/Male ratio (-1: genderless, 0: 100% male, 8: 100% female)
-    ratio  Int?  @default(-1)
+    ratio  Float?  @default(-1)
 
     baseHappiness Int?  @default(70) // pour les attaques Retour/Frustration
 

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, type FormEvent } from 'react'
 
 type Message = { id: number; author: string; text: string }
 
+// Conteneur du panneau de chat latéral.
 export default function ChatPanel() {
   return (
     <aside className="flex h-full min-h-0 w-50 shrink-0 flex-col rounded border-l border-white/10 bg-black/40 p-4 text-sm">
@@ -10,13 +11,14 @@ export default function ChatPanel() {
   )
 }
 
+// Gère les messages de démonstration et le brouillon du chat général.
  function GeneralChat() {
     const [messages, setMessages] = useState<Message[]>([
   { id: 1, author: 'Spheal', text: 'BaaaAAaAAa !' },
-  { id: 2, author: 'Victini', text: 'Tiniiii 🫐 !' },
+  { id: 2, author: 'Victini', text: 'Tiniiii ✌️ !' },
   { id: 3, author: 'Oshawott', text: 'Oshaaaa !' },
   { id: 4, author: 'Snorlax', text: 'zzZZzzZ !' },
-  { id: 5, author: 'Mimikyu', text: '✨-✨ Kyuuuu !' },
+  { id: 5, author: 'Mimikyu', text: '✨-✨!' },
     ]);
     const [draft, setDraft] = useState('');
 
@@ -29,6 +31,7 @@ export default function ChatPanel() {
         scrollToBottom();
     }, [messages]);
 
+    // Ajoute les messages à l'état local ; la persistance serveur viendra avec Socket.IO.
     const handleSendMessage = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault(); //evite que ca refresh apres chaque new msg
         const text = draft.trim();

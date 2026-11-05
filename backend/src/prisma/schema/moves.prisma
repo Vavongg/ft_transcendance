@@ -1,0 +1,38 @@
+model Move {
+    id           Int          @id @default(autoincrement())
+    name         String       @unique
+    nameFR       String?
+    nameDE       String?
+    type         String
+    power        Int?
+    accuracy     Int?
+    effectChance Int?
+    pp           Int?
+    priority     Int?
+    category  CategoryClass?
+
+    pokemons     Pokemon[]   @relation("PokemonMoves")
+    ailments     Ailment[]   @relation("AilmentMoves")
+}
+
+enum CategoryClass {
+    PHYSICAL
+    SPECIAL
+    STATUS
+}
+
+model Ailment {
+    id        Int    @id @default(autoincrement())
+    name      String @unique
+    //nameFR    String?
+    //nameDE    String?
+    movesFrom Move[] @relation("AilmentMoves")
+}
+
+// model MoveStatAffectSet {
+//     id             Int    @id @default(autoincrement())
+//     moves           Move[]   @relation("MoveStatAffectSet")
+//     moveId         Int
+//     statAffects    Json?
+//     ailmentAffects Json?
+// }

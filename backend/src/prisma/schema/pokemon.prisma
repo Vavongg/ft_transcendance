@@ -1,18 +1,48 @@
 model Pokemon {
-    id    Int    @id @default(autoincrement())
-    name  String @unique
-    type  String
-    level Int
-    stats Json?
-    moves Move[] @relation("PokemonMoves")
+    id         Int     @id @default(autoincrement())
+    name       String  @unique
+    type       String
+    is_default Boolean @default(false)
+    level      Int
+
+    //Base stats 
+    hp    Int @default(0)
+    atk   Int @default(0)
+    def   Int @default(0)
+    spAtk Int @default(0)
+    spDef Int @default(0)
+    speed Int @default(0)
+
+    // Femelle/Male ratio (-1: genderless, 0: 100% male, 8: 100% female)
+    ratio  Float?  @default(-1)
+
+    baseHappiness Int?  @default(70) // pour les attaques Retour/Frustration
+
+    //Relations (clés étrangères)
+    spriteId Int?
+
+    ability PokemonAbility[] @relation("PokemonAbilities")
+    moves   Move[]           @relation("PokemonMoves")
+    sprite  PokemonSprite?   @relation(fields: [spriteId], references: [id])
 }
 
-model Move {
-    id          Int    @id @default(autoincrement())
-    name        String @unique
-    type        String
-    power       Int?
-    accuracy    Int?
-    pp          Int?
-    pokemons Pokemon[] @relation("PokemonMoves")
+
+model PokemonAbility {
+    id       Int       @id @default(autoincrement())
+    name     String    @unique
+    effect   String?
+    pokemons Pokemon[] @relation("PokemonAbilities")
+}
+
+model PokemonSprite {
+    id                 Int       @id @default(autoincrement())
+    front_default      String?
+    front_shiny        String?
+    front_female       String?
+    front_shiny_female String?
+    back_default       String?
+    back_female        String?
+    back_shiny         String?
+    back_shiny_female  String?
+    pokemons           Pokemon[]
 }

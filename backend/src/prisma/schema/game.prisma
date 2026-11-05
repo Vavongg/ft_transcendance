@@ -7,3 +7,26 @@ model Game {
     winner User @relation("Winner", fields: [winnerId], references: [id])
     loser  User @relation("Loser", fields: [loserId], references: [id])
 }
+
+model Stat {
+    id   Int    @id @default(autoincrement())
+    name String @unique
+}
+
+model Nature {
+    id         Int      @id @default(autoincrement())
+    natureName   String   @unique
+    decreasedStat String? //Provisoire pour le `?`
+    increasedStat String? //Provisoire pour le `?`
+    //names
+}
+
+// model Stat {
+//     id   Int    @id @default(autoincrement())
+//     name String @unique
+
+//     natures Nature[]
+//     IVstats IVstat[] @default(0)
+//     EVstats EVstat[] @default(0)
+// }
+

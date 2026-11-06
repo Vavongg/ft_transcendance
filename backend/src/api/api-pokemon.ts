@@ -25,6 +25,10 @@ export class ApiPokemonService implements OnApplicationBootstrap {
     await this.moveImportService.importMoves();
     await this.abilityImportService.importAbility();
     await this.importPokemons();
+
+    // Nettoyage complet pour repartir de zér0 propre
+    // await this.prisma.pokemon.deleteMany({});
+    // await this.prisma.pokemonSprite.deleteMany({});
   }
 
   // Fonction de récupération && d'insertion des Pokémon
@@ -42,11 +46,14 @@ export class ApiPokemonService implements OnApplicationBootstrap {
         if (count >= maxPokemons) {
           break;
         }
-        
+
         // Pour chaque Pokemon
         try {
-          const sortName = [pokemon.species.name, pokemon.name, pokemon.name.split('-')[0],
-        ];
+          const sortName = [
+            pokemon.species.name,
+            pokemon.name,
+            pokemon.name.split('-')[0],
+          ];
           const finalName = Array.from(new Set(sortName.filter(Boolean)));
 
           let species = null;
@@ -54,8 +61,7 @@ export class ApiPokemonService implements OnApplicationBootstrap {
             try {
               species = await this.api.pokemon.getPokemonSpeciesByName(nameTry);
               break;
-            } catch (e) {
-            }
+            } catch (e) {}
           }
           if (!species) {
             throw new Error('Failure for repecuration of Pokemon name.');
@@ -76,7 +82,7 @@ export class ApiPokemonService implements OnApplicationBootstrap {
           // Vérifier que les talents existent dans la base
           const existingAbility = await this.prisma.pokemonAbility.findMany({
             where: { name: { in: abilityNames } },
-            select: { name: true },
+            //select: { name: true },
           });
 
           const addingAbility = existingAbility.map((a) => a.name);
@@ -87,14 +93,26 @@ export class ApiPokemonService implements OnApplicationBootstrap {
           // Vérifier que les attaques existent dans la base
           const existingMoves = await this.prisma.move.findMany({
             where: { name: { in: MoveNames } },
-            select: { name: true },
+            //select: { name: true },
           });
 
           const addingMoves = existingMoves.map((m) => m.name);
 
           //Import des Sprites
-          const createSprite = await this.prisma.pokemonSprite.create({
-            data: {
+          const createSprite = await this.prisma.pokemonSprite.upsert({
+            where: { id: pokemon.id },
+            update: {
+              front_default: pokemon.sprites.front_default,
+              front_shiny: pokemon.sprites.front_shiny,
+              front_female: pokemon.sprites.front_female,
+              front_shiny_female: pokemon.sprites.front_shiny_female,
+              back_default: pokemon.sprites.back_default,
+              back_shiny: pokemon.sprites.back_shiny,
+              back_female: pokemon.sprites.back_female,
+              back_shiny_female: pokemon.sprites.back_shiny_female,
+            },
+            create: {
+              id: pokemon.id,
               front_default: pokemon.sprites.front_default,
               front_shiny: pokemon.sprites.front_shiny,
               front_female: pokemon.sprites.front_female,
@@ -106,10 +124,21 @@ export class ApiPokemonService implements OnApplicationBootstrap {
             },
           });
 
+          const uniqueAbilities = Array.from(new Set(addingAbility));
+          const uniqueMoves = Array.from(new Set(addingMoves));
+
           // Ajouter chaque Pokémon dans la base de données via Prisma
           await this.prisma.pokemon.upsert({
             where: { id: pokemon.id },
-            update: {},
+            update: {
+              ability: {
+                set: uniqueAbilities.map((name) => ({ name })),
+              },
+
+              moves: {
+                set: uniqueMoves.map((name) => ({ name })),
+              },
+            },
             create: {
               id: pokemon.id,
               name: pokemon.name,
@@ -131,11 +160,11 @@ export class ApiPokemonService implements OnApplicationBootstrap {
               baseHappiness: baseHappinessValue,
 
               ability: {
-                connect: addingAbility.map((abilityNames) => ({name: abilityNames})),
+                connect: uniqueAbilities.map((name) => ({ name })),
               },
 
               moves: {
-                connect: addingMoves.map((moveName) => ({ name: moveName })),
+                connect: uniqueMoves.map((name) => ({ name })),
               },
 
               spriteId: createSprite.id,
@@ -145,14 +174,20 @@ export class ApiPokemonService implements OnApplicationBootstrap {
           this.logger.log(`[${count + 1}] Added Pokemon : ${pokemon.name}`);
           count++;
         } catch (pokemonError) {
-          // Attrape l'erreur d'un Pokémon spécifique sans couper la boucle globale
-          this.logger.error(`Erreur sur le Pokémon ${pokemon.name} (ID: ${pokemon.id}):`, pokemonError);
+          // Affiche l'erreur d'un Pokémon spécifique sans couper la boucle globale
+          this.logger.error(
+            `Erreur sur le Pokémon ${pokemon.name} (ID: ${pokemon.id}):`,
+            pokemonError,
+          );
         }
       }
-      
-        this.logger.log('[ApiPokemonService] Pokemon successfully imported!');
-      } catch (error) {
-        this.logger.error('[ApiPokemonService] Error during Pokemons import', error);
+
+      this.logger.log('[ApiPokemonService] Pokemon successfully imported!');
+    } catch (error) {
+      this.logger.error(
+        '[ApiPokemonService] Error during Pokemons import',
+        error,
+      );
     }
   }
 }

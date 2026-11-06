@@ -1,14 +1,14 @@
 model Move {
     id           Int          @id @default(autoincrement())
     name         String       @unique
-    nameFR       String?
-    nameDE       String?
-    type         String
-    power        Int?
-    accuracy     Int?
+    accurancy   Int?
     effectChance Int?
-    pp           Int?
+    pp  Int?
     priority     Int?
+    power        Int?
+    category    CategoryClass?
+    type         String
+  
     category  CategoryClass?
 
     pokemons     Pokemon[]   @relation("PokemonMoves")

@@ -1,5 +1,8 @@
+// Écran d'accueil en construction.
 export default function Home() {
   return (
-  <div>Home Page</div>
+    <div className="flex h-full items-center justify-center">
+      Homepage
+    </div>
   );
 }

@@ -1,18 +1,16 @@
 model Move {
-    id           Int          @id @default(autoincrement())
-    name         String       @unique
-    accurancy   Int?
+    id           Int            @id @default(autoincrement())
+    name         String         @unique
+    accurancy    Int?
     effectChance Int?
-    pp  Int?
+    pp           Int?
     priority     Int?
     power        Int?
-    category    CategoryClass?
+    category     CategoryClass?
     type         String
-  
-    category  CategoryClass?
 
-    pokemons     Pokemon[]   @relation("PokemonMoves")
-    ailments     Ailment[]   @relation("AilmentMoves")
+    pokemons Pokemon[] @relation("PokemonMoves")
+    ailments Ailment[] @relation("AilmentMoves")
 }
 
 enum CategoryClass {

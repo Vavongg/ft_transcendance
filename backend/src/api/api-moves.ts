@@ -52,10 +52,13 @@ export class MoveImportService implements OnApplicationBootstrap {
           update: {},
           create: {
             name: moveDetails.name,
-            type: moveDetails.type.name,
-            power: moveDetails.power ?? null,
             accuracy: moveDetails.accuracy ?? null,
+            effectChance: moveDetails.effect_chance ?? null,
             pp: moveDetails.pp ?? null,
+            priority: moveDetails.priority ?? null,
+            power: moveDetails.power ?? null,
+            //category: moveDetails.damage_class,
+            type: moveDetails.type.name,
             //description: cleanDescription,
           },
         });

@@ -21,7 +21,7 @@ export class NatureImportService implements OnApplicationBootstrap {
 
   async importNatures() {
     try {
-      const natureDetail = await this.api.pokemon.listNatures();
+      const natureDetail = await this.api.pokemon.listNatures(0,100);
 
       for (const natureEntry of natureDetail.results) {
         const natureDetails = await this.api.pokemon.getNatureByName(natureEntry.name);
@@ -38,10 +38,10 @@ export class NatureImportService implements OnApplicationBootstrap {
         });
       }
 
-      this.logger.log('[NatureImportService] Natures imported successfully.');
+      this.logger.log('[NatureImportService] Natures successfully imported.');
     } catch (error) {
       this.logger.error(
-        '[NatureImportService] Error importing natures:',
+        '[NatureImportService] Error during nature import.',
         error,
       );
     }

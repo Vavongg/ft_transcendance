@@ -52,7 +52,7 @@ export class MoveImportService implements OnApplicationBootstrap {
           update: {},
           create: {
             name: moveDetails.name,
-            accuracy: moveDetails.accuracy ?? null,
+            accurancy: moveDetails.accuracy ?? null,
             effectChance: moveDetails.effect_chance ?? null,
             pp: moveDetails.pp ?? null,
             priority: moveDetails.priority ?? null,
@@ -66,9 +66,9 @@ export class MoveImportService implements OnApplicationBootstrap {
         count++;
         //this.logger.log(`[MoveImportService] [${count}] Added Move : ${moveDetails.name}`);
       }
-      this.logger.log('[MoveImportService] Successfully imported moves!');
+      this.logger.log('[MoveImportService] Moves successfully imported!');
     } catch (error) {
-      this.logger.error('[MoveImportService] Error importing moves:', error);
+      this.logger.error('[MoveImportService] Error during moves import', error);
     }
   }
 }

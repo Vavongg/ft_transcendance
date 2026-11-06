@@ -27,10 +27,3 @@ model Ailment {
     movesFrom Move[] @relation("AilmentMoves")
 }
 
-// model MoveStatAffectSet {
-//     id             Int    @id @default(autoincrement())
-//     moves           Move[]   @relation("MoveStatAffectSet")
-//     moveId         Int
-//     statAffects    Json?
-//     ailmentAffects Json?
-// }

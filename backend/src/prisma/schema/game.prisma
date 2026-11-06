@@ -16,8 +16,8 @@ model Stat {
 model Nature {
     id         Int      @id @default(autoincrement())
     natureName   String   @unique
-    decreasedStat String? //Provisoire pour le `?`
-    increasedStat String? //Provisoire pour le `?`
+    decreasedStat String? 
+    increasedStat String?
     //names
 }
 

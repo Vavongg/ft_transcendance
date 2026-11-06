@@ -22,7 +22,7 @@ export class AbilityImportService implements OnApplicationBootstrap {
   async importAbility() {
     try {
       this.logger.log('[AbilityImportService] Starting abilities import...');
-      const abilityDetail = await this.api.pokemon.listAbilities();
+      const abilityDetail = await this.api.pokemon.listAbilities(0, 500);
 
       for (const abilityEntry of abilityDetail.results) {
         const abilityDetails = await this.api.pokemon.getAbilityByName(

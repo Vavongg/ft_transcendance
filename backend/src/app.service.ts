@@ -4,7 +4,11 @@ import {
   OnApplicationBootstrap,
 } from '@nestjs/common';
 
-import { MoveImportService } from './api/api-moves';
+import {
+  MoveAilmentImportService,
+  MoveDamageClassImportService,
+  MoveImportService,
+} from './api/api-moves';
 import { NatureImportService } from './api/api-nature';
 import { ApiPokemonService } from './api/api-pokemon';
 import { TypeImportService } from './api/api-type';
@@ -16,8 +20,10 @@ export class ImportAllDataService implements OnApplicationBootstrap {
   constructor(
     private readonly natureImport: NatureImportService,
     private readonly typeImport: TypeImportService,
-    private readonly moveImport: MoveImportService,
     private readonly moveDamageImport : MoveDamageClassImportService,
+    private readonly moveAilmentImport : MoveAilmentImportService,
+    private readonly moveImport: MoveImportService,
+    
     private readonly pokemonImport: ApiPokemonService,
   ) {}
 
@@ -31,6 +37,7 @@ export class ImportAllDataService implements OnApplicationBootstrap {
     await this.natureImport.importNatures();
     await this.typeImport.importTypes();
     await this.moveDamageImport.importMoveDamageClass();
+    await this.moveAilmentImport.importMoveAilment();
     await this.moveImport.importMoves();
     await this.pokemonImport.importPokemons();
   }

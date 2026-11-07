@@ -14,12 +14,15 @@ export class NatureImportService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async importNatures() {
+  async importNatures(): Promise<void> {
+    this.logger.log('[NatureImportService] Starting move import...');
     try {
-      const natureDetail = await this.api.pokemon.listNatures(0,100);
+      const natureDetail = await this.api.pokemon.listNatures(0, 100);
 
       for (const natureEntry of natureDetail.results) {
-        const natureDetails = await this.api.pokemon.getNatureByName(natureEntry.name);
+        const natureDetails = await this.api.pokemon.getNatureByName(
+          natureEntry.name,
+        );
 
         await this.prisma.nature.upsert({
           where: { id: natureDetails.id },

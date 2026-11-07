@@ -23,7 +23,7 @@ export class ApiPokemonService {
   ) {}
 
   // Fonction de récupération && d'insertion des Pokémon
-  async importPokemons() {
+  async importPokemons(): Promise<void> {
     let count = 0;
     const maxPokemons = 807;
 
@@ -163,7 +163,7 @@ export class ApiPokemonService {
             },
           });
 
-          this.logger.log(`[${count + 1}] Added Pokemon : ${pokemon.name}`);
+          //this.logger.log(`[${count + 1}] Added Pokemon : ${pokemon.name}`);
           count++;
         } catch (pokemonError) {
           // Affiche l'erreur d'un Pokémon spécifique sans couper la boucle globale

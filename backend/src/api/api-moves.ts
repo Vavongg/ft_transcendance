@@ -60,15 +60,16 @@ export class MoveImportService {
             statChance: moveDetails.meta?.stat_chance,
 
             type: {
-              connectOrCreate:[ {
-                where: {name: moveDetails.type.name},
-                create: { name: moveDetails.type.name },
-              }
-            ]
-            }
+              connectOrCreate: [
+                {
+                  where: { name: moveDetails.type.name },
+                  create: { name: moveDetails.type.name },
+                },
+              ],
+            },
           },
         });
-    
+
         count++;
         //this.logger.log(`[MoveImportService] [${count}] Added Move : ${moveDetails.name}`);
       }
@@ -86,24 +87,69 @@ export class MoveDamageClassImportService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async importMoveDamageClass() {
+  async importMoveDamageClass(): Promise<void> {
+    this.logger.log('[MoveDamageClassImportService] Starting move import...');
     try {
       const moveDamageDetails = await this.moveClient.listMoveDamageClasses();
-  
-        for (const damageClassRef of moveDamageDetails.results) {
-          const details = await this.moveClient.getMoveDamageClassByName(damageClassRef.name);
 
-          await this.prisma.moveDamageClass.upsert({
-            where: {name: details.name},
-            update: {},
-            create: {
-              name: details.name,
-            },
-          });
-        }
-        this.logger.log('[MoveDamageImportService] Move damage classes successfully imported!');
-      } catch (error) {
-        this.logger.error('[MoveDamageImportService] Error during move damage import', error);
+      for (const damageClassRef of moveDamageDetails.results) {
+        const details = await this.moveClient.getMoveDamageClassByName(
+          damageClassRef.name,
+        );
+
+        await this.prisma.moveDamageClass.upsert({
+          where: { name: details.name },
+          update: {},
+          create: {
+            name: details.name,
+          },
+        });
       }
+      this.logger.log(
+        '[MoveDamageImportService] Move damage classes successfully imported!',
+      );
+    } catch (error) {
+      this.logger.error(
+        '[MoveDamageImportService] Error during move damage import',
+        error,
+      );
     }
   }
+}
+
+@Injectable()
+export class MoveAilmentImportService {
+  private readonly moveClient = new MoveClient();
+  private readonly logger = new Logger(MoveAilmentImportService.name);
+
+  constructor(private readonly prisma: PrismaService) {}
+
+  async importMoveAilment(): Promise<void> {
+    this.logger.log('[MoveAilmentImportService] Starting move import...');
+    try {
+      const moveAilmentDetails = await this.moveClient.listMoveAilments();
+
+      for (const ailmentRef of moveAilmentDetails.results) {
+        const details = await this.moveClient.getMoveAilmentByName(
+          ailmentRef.name,
+        );
+
+        await this.prisma.movesAilment.upsert({
+          where: { name: details.name },
+          update: {},
+          create: {
+            name: details.name,
+          },
+        });
+      }
+      this.logger.log(
+        '[MoveAilmentImportService] Move ailments successfully imported!',
+      );
+    } catch (error) {
+      this.logger.error(
+        '[MoveAilmentImportService] Error during move ailment import',
+        error,
+      );
+    }
+  }
+}

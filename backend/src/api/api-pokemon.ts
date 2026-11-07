@@ -17,7 +17,7 @@ export class ApiPokemonService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly typeImportService: TypeImportService, 
+    private readonly typeImportService: TypeImportService,
     private readonly moveImportService: MoveImportService,
     private readonly abilityImportService: AbilityImportService,
   ) {}
@@ -133,7 +133,7 @@ export class ApiPokemonService {
             create: {
               id: pokemon.id,
               name: pokemon.name,
-              type: pokemon.types.map((t) => t.type.name).join(', '),
+              is_default: pokemon.is_default,
               level: 100,
 
               //Base stats
@@ -153,12 +153,13 @@ export class ApiPokemonService {
               ability: {
                 connect: uniqueAbilities.map((name) => ({ name })),
               },
-
               moves: {
                 connect: uniqueMoves.map((name) => ({ name })),
               },
-
               spriteId: createSprite.id,
+              type: {
+                connect: pokemon.types.map((t) => ({ name: t.type.name })),
+              },
             },
           });
 

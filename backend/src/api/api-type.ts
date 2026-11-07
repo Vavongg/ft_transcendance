@@ -14,7 +14,6 @@ export class TypeImportService {
 
     constructor(private readonly prisma: PrismaService) {}
 
-
     async importTypes(): Promise<void> {
 
     }

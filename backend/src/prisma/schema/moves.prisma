@@ -1,29 +1,38 @@
 model Move {
-    id           Int            @id @default(autoincrement())
-    name         String         @unique
-    accurancy    Int?
-    effectChance Int?
-    pp           Int?
-    priority     Int?
-    power        Int?
-    category     CategoryClass?
-    type         String
-
-    pokemons Pokemon[] @relation("PokemonMoves")
-    ailments Ailment[] @relation("AilmentMoves")
-}
-
-enum CategoryClass {
-    PHYSICAL
-    SPECIAL
-    STATUS
-}
-
-model Ailment {
     id        Int    @id @default(autoincrement())
     name      String @unique
-    //nameFR    String?
-    //nameDE    String?
-    movesFrom Move[] @relation("AilmentMoves")
+    accurancy Int?
+    pp        Int?
+    priority  Int?
+    power     Int?
+    type      String
+
+    //Propriété de l'attaque
+    minHits Int?
+    maxHits Int?
+    minTurns Int?
+    maxTurns Int?
+    drain Int?
+    healing Int?
+    critRate Int?
+    ailmentChance Int?
+    flinchChance Int? // Chance de modifier un stat du target
+    statChance Int?
+
+    // Relation avec les autres modèles
+    damageClass MoveDamageClass[] @relation("DamageClass")
+    pokemons    Pokemon[]         @relation("PokemonMoves")
+    ailments    MovesAilment[]    @relation("AilmentMoves")
 }
 
+model MoveDamageClass {
+    id    Int    @id @default(autoincrement())
+    name  String @unique
+    moves Move[] @relation("DamageClass")
+}
+
+model MovesAilment {
+    id    Int    @id @default(autoincrement())
+    name  String @unique
+    moves Move[] @relation("AilmentMoves")
+}

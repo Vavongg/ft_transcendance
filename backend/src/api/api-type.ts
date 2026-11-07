@@ -3,23 +3,19 @@ import { MainClient } from 'pokenode-ts';
 import {
   Injectable,
   Logger,
-  OnApplicationBootstrap,
 } from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
-export class TypeImportService implements OnApplicationBootstrap {
+export class TypeImportService {
     private readonly TypeClient = new MainClient();
     private readonly logger = new Logger(TypeImportService.name);
 
     constructor(private readonly prisma: PrismaService) {}
 
-    async onApplicationBootstrap() {
-        await this.importType();
-    }
 
-    async importType(): Promise<void> {
+    async importTypes(): Promise<void> {
 
     }
 }

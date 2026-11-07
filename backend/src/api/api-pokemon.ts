@@ -3,33 +3,24 @@ import { MainClient } from 'pokenode-ts';
 import {
   Injectable,
   Logger,
-  OnApplicationBootstrap,
 } from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
 import { AbilityImportService } from './api-abilities';
 import { MoveImportService } from './api-moves';
+import { TypeImportService } from './api-type';
 
 @Injectable()
-export class ApiPokemonService implements OnApplicationBootstrap {
+export class ApiPokemonService {
   private readonly api = new MainClient();
   private readonly logger = new Logger(ApiPokemonService.name);
 
   constructor(
     private readonly prisma: PrismaService,
+    private readonly typeImportService: TypeImportService, 
     private readonly moveImportService: MoveImportService,
     private readonly abilityImportService: AbilityImportService,
   ) {}
-
-  async onApplicationBootstrap() {
-    await this.moveImportService.importMoves();
-    await this.abilityImportService.importAbility();
-    await this.importPokemons();
-
-    // Nettoyage complet pour repartir de zér0 propre
-    // await this.prisma.pokemon.deleteMany({});
-    // await this.prisma.pokemonSprite.deleteMany({});
-  }
 
   // Fonction de récupération && d'insertion des Pokémon
   async importPokemons() {

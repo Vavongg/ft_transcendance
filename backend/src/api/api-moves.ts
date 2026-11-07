@@ -3,21 +3,16 @@ import { MoveClient } from 'pokenode-ts';
 import {
   Injectable,
   Logger,
-  OnApplicationBootstrap,
 } from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
-export class MoveImportService implements OnApplicationBootstrap {
+export class MoveImportService {
   private readonly moveClient = new MoveClient();
   private readonly logger = new Logger(MoveImportService.name);
 
   constructor(private readonly prisma: PrismaService) {}
-
-  async onApplicationBootstrap() {
-    await this.importMoves();
-  }
 
   async importMoves(): Promise<void> {
     this.logger.log('[MoveImportService] Starting move import...');

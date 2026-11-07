@@ -3,21 +3,16 @@ import { MainClient } from 'pokenode-ts';
 import {
   Injectable,
   Logger,
-  OnApplicationBootstrap,
 } from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
-export class NatureImportService implements OnApplicationBootstrap {
+export class NatureImportService {
   private readonly api = new MainClient();
   private readonly logger = new Logger(NatureImportService.name);
 
   constructor(private readonly prisma: PrismaService) {}
-
-  async onApplicationBootstrap() {
-    await this.importNatures();
-  }
 
   async importNatures() {
     try {

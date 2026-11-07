@@ -4,6 +4,7 @@ import { AbilityImportService } from './api/api-abilities';
 import { MoveImportService } from './api/api-moves';
 import { NatureImportService } from './api/api-nature';
 import { ApiPokemonService } from './api/api-pokemon';
+import { TypeImportService } from './api/api-type';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaService } from './prisma/prisma.service';
@@ -17,6 +18,7 @@ import { PrismaService } from './prisma/prisma.service';
     MoveImportService,
     AbilityImportService,
     NatureImportService,
+    TypeImportService,
   ],
 })
 export class AppModule {}

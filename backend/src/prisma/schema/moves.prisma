@@ -1,28 +1,29 @@
 model Move {
-    id        Int    @id @default(autoincrement())
-    name      String @unique
-    accurancy Int?
-    pp        Int?
-    priority  Int?
-    power     Int?
-    type      String
+    id           Int    @id @default(autoincrement())
+    name         String @unique
+    accurancy    Int?
+    effectChance Int?
+    pp           Int?
+    priority     Int?
+    power        Int?
 
-    //Propriété de l'attaque
-    minHits Int?
-    maxHits Int?
-    minTurns Int?
-    maxTurns Int?
-    drain Int?
-    healing Int?
-    critRate Int?
+    //Propriété/effet secondaire de l'attaque
+    minHits       Int?
+    maxHits       Int?
+    minTurns      Int?
+    maxTurns      Int?
+    drain         Int?
+    healing       Int?
+    critRate      Int?
     ailmentChance Int?
-    flinchChance Int? // Chance de modifier un stat du target
-    statChance Int?
+    flinchChance  Int? // Chance de modifier un stat du target
+    statChance    Int?
 
     // Relation avec les autres modèles
     damageClass MoveDamageClass[] @relation("DamageClass")
     pokemons    Pokemon[]         @relation("PokemonMoves")
     ailments    MovesAilment[]    @relation("AilmentMoves")
+    type        Type[]            @relation("MoveType")
 }
 
 model MoveDamageClass {

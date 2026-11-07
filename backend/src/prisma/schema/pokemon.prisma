@@ -1,7 +1,7 @@
 model Pokemon {
     id         Int     @id @default(autoincrement())
     name       String  @unique
-    type       String
+    
     is_default Boolean @default(false)
     level      Int
 
@@ -24,6 +24,7 @@ model Pokemon {
     ability PokemonAbility[] @relation("PokemonAbilities")
     moves   Move[]           @relation("PokemonMoves")
     sprite  PokemonSprite?   @relation(fields: [spriteId], references: [id])
+    type    Type[]  @relation("PokemonType")
 }
 
 

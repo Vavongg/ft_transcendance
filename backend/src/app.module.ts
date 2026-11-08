@@ -1,24 +1,35 @@
 import { Module } from '@nestjs/common';
 
 import { AbilityImportService } from './api/api-abilities';
-import { MoveImportService } from './api/api-moves';
+import {
+  MoveAilmentImportService,
+  MoveDamageClassImportService,
+  MoveImportService,
+} from './api/api-moves';
 import { NatureImportService } from './api/api-nature';
 import { ApiPokemonService } from './api/api-pokemon';
-import { TypeImportService } from './api/api-type';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import {
+  TypeImportService,
+  TypeRelationImportService,
+} from './api/api-type';
+import { ImportController } from './app.controller';
+import { ImportAllDataService } from './app.service';
 import { PrismaService } from './prisma/prisma.service';
 
 @Module({
   imports: [],
-  controllers: [AppController],
-  providers: [AppService,
+  controllers: [ImportController],
+  providers: [
+    ImportAllDataService,
     PrismaService,
     ApiPokemonService,
     MoveImportService,
+    MoveDamageClassImportService,
+    MoveAilmentImportService,
     AbilityImportService,
     NatureImportService,
     TypeImportService,
+    TypeRelationImportService,
   ],
 })
 export class AppModule {}

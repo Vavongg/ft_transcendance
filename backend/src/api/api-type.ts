@@ -17,7 +17,7 @@ export class TypeImportService {
   async importTypes(): Promise<void> {
     this.logger.log('[TypeImportService] Starting abilities import...');
     try {
-      const typeDetails = await this.api.pokemon.listTypes();
+      const typeDetails = await this.api.pokemon.listTypes(0, 18);
 
       for (const typeEntry of typeDetails.results) {
         const typeDetails = await this.api.pokemon.getTypeByName(
@@ -65,19 +65,31 @@ export class TypeRelationImportService {
         const typeDetails = await this.api.pokemon.getTypeByName(
           relationEntry.name,
         );
-        
+
         const doubleDamageTo = typeDetails.damage_relations.double_damage_to;
 
-        await this.prisma.type.update({
+        await this.prisma.type.upsert({
           where: { id: typeDetails.id },
-          data: {
-            damageRelation: {
+          update: {
+            TypeRelation: {
               connectOrCreate: doubleDamageTo.map((target) => ({
-                where: { name: target.name }, 
+                where: { name: target.name },
                 create: {
                   name: target.name,
+                },
+              })),
+            },
           },
-        })),
+          create: {
+            id: typeDetails.id,
+            name: typeDetails.name,
+            TypeRelation: {
+              connectOrCreate: doubleDamageTo.map((target) => ({
+                where: { name: target.name },
+                create: {
+                  name: target.name,
+                },
+              })),
             },
           },
         });

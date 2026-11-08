@@ -1,5 +1,5 @@
 model Move {
-    id           Int    @id @default(autoincrement())
+    id           Int    @id
     name         String @unique
     accurancy    Int?
     effectChance Int?
@@ -21,19 +21,19 @@ model Move {
 
     // Relation avec les autres modèles
     damageClass MoveDamageClass[] @relation("DamageClass")
-    pokemons    Pokemon[]         @relation("PokemonMoves")
     ailments    MovesAilment[]    @relation("AilmentMoves")
+    pokemons    Pokemon[]         @relation("PokemonMoves")
     type        Type[]            @relation("MoveType")
 }
 
 model MoveDamageClass {
-    id    Int    @id @default(autoincrement())
+    id    Int    @id @default(autoincrement()) // 3
     name  String @unique
     moves Move[] @relation("DamageClass")
 }
 
 model MovesAilment {
-    id    Int    @id @default(autoincrement())
+    id    Int    @id @default(autoincrement()) //askip il en a 22
     name  String @unique
     moves Move[] @relation("AilmentMoves")
 }

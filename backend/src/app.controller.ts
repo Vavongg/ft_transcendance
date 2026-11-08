@@ -1,12 +1,17 @@
-import { Controller, Get } from '@nestjs/common';
-import { AppService } from './app.service';
+import {
+  Controller,
+  Post,
+} from '@nestjs/common';
 
-@Controller()
-export class AppController {
-  constructor(private readonly appService: AppService) {}
+import { ImportAllDataService } from './app.service';
 
-  @Get()
-  getHello(): string {
-    return this.appService.getHello();
-  }
+@Controller('import')
+export class ImportController {
+  constructor(private readonly importAllDataService: ImportAllDataService) {}
+
+  @Post()
+  async triggerImport() {
+    await this.importAllDataService.runAllImport();
+    return { message: 'Import completed successfully!' };
+}
 }

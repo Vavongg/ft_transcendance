@@ -14,7 +14,7 @@ export class AbilityImportService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async importAbility() : Promise<void> {
+  async importAbility(): Promise<void> {
     this.logger.log('[AbilityImportService] Starting abilities import...');
     try {
       const abilityDetail = await this.api.pokemon.listAbilities(0, 500);
@@ -39,7 +39,7 @@ export class AbilityImportService {
           },
         });
       }
-      
+
       this.logger.log(
         '[AbilityImportService] Abilities successfully imported!',
       );

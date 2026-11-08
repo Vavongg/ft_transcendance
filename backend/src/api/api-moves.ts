@@ -18,29 +18,33 @@ export class MoveImportService {
     this.logger.log('[MoveImportService] Starting move import...');
     try {
       let count = 0;
+      const maxMove = 901;
+
       // Trouver toutes les attaques par pagination
       for await (const moveSummary of this.moveClient.paginate('listMoves', {
         pageSize: 50,
         resolve: true,
       })) {
+        if (count > maxMove) {
+          break;
+        }
+
         const moveDetails = await this.moveClient.getMoveByName(
           moveSummary.name,
         );
 
-        // // Récupérer le FR
-        // const frFlavorTextEntry = moveDetails.flavor_text_entries.find(
-        //   (entry) => entry.language.name === 'fr',
-        // );
-        // // Nettoyer les caractères spéciaux et sauts de texte etc.
-        // const cleanDescription = frFlavorTextEntry
-        //   ? frFlavorTextEntry.flavor_text.replace(/[\n\f\r]/g, ' ')
-        //   : null;
+        this.logger.log(
+          `Tentative d'upsert pour le move ID: ${moveDetails.id} (${moveDetails.name})`,
+        );
 
+        this.logger.log(
+          `Vérification - DamageClass: ${moveDetails.damage_class?.name}, Type: ${moveDetails.type?.name}, Ailment: ${moveDetails.meta?.ailment?.name}`,
+        );
         // Insertion de l'attaque en base de données
         await this.prisma.move.upsert({
-          where: { name: moveDetails.name },
-          update: {},
-          create: {
+          where: { id: moveDetails.id },
+          update: {
+            id: moveDetails.id,
             name: moveDetails.name,
             accurancy: moveDetails.accuracy ?? null,
             effectChance: moveDetails.effect_chance ?? null,
@@ -59,14 +63,95 @@ export class MoveImportService {
             flinchChance: moveDetails.meta?.flinch_chance,
             statChance: moveDetails.meta?.stat_chance,
 
-            type: {
-              connectOrCreate: [
-                {
-                  where: { name: moveDetails.type.name },
-                  create: { name: moveDetails.type.name },
-                },
-              ],
-            },
+            damageClass: moveDetails.damage_class
+              ? {
+                  connect: [
+                    {
+                      name: moveDetails.damage_class.name,
+                    },
+                  ],
+                }
+              : undefined,
+
+            ailments:
+              moveDetails.meta?.ailment &&
+              [
+                'paralysis',
+                'poison',
+                'burn',
+                'freeze',
+                'sleep',
+                'confusion',
+              ].includes(moveDetails.meta.ailment.name)
+                ? {
+                    connect: [
+                      {
+                        name: moveDetails.meta.ailment.name,
+                      },
+                    ],
+                  }
+                : undefined,
+
+            type: moveDetails.type
+              ? {
+                  connect: [{ name: moveDetails.type.name }],
+                }
+              : undefined,
+          },
+          create: {
+            id: moveDetails.id,
+            name: moveDetails.name,
+            accurancy: moveDetails.accuracy ?? null,
+            effectChance: moveDetails.effect_chance ?? null,
+            pp: moveDetails.pp ?? null,
+            priority: moveDetails.priority ?? null,
+            power: moveDetails.power ?? null,
+
+            minHits: moveDetails.meta?.min_hits,
+            maxHits: moveDetails.meta?.max_hits,
+            minTurns: moveDetails.meta?.min_turns,
+            maxTurns: moveDetails.meta?.max_turns,
+            drain: moveDetails.meta?.drain,
+            healing: moveDetails.meta?.healing,
+            critRate: moveDetails.meta?.crit_rate,
+            ailmentChance: moveDetails.meta?.ailment_chance,
+            flinchChance: moveDetails.meta?.flinch_chance,
+            statChance: moveDetails.meta?.stat_chance,
+
+            damageClass: moveDetails.damage_class
+              ? {
+                  connect: [
+                    {
+                      name: moveDetails.damage_class.name,
+                    },
+                  ],
+                }
+              : undefined,
+
+            ailments:
+              moveDetails.meta?.ailment &&
+              [
+                'paralysis',
+                'poison',
+                'burn',
+                'freeze',
+                'sleep',
+                'confusion',
+              ].includes(moveDetails.meta.ailment.name)
+                ? {
+                    connect: [
+                      {
+                        name: moveDetails.meta.ailment.name,
+                      },
+                    ],
+                  }
+                : undefined,
+
+            type: moveDetails.type
+              ? {
+                  connect: [{ name: moveDetails.type.name }],
+                }
+              : undefined,
           },
         });
 
@@ -98,9 +183,13 @@ export class MoveDamageClassImportService {
         );
 
         await this.prisma.moveDamageClass.upsert({
-          where: { name: details.name },
-          update: {},
+          where: { id: details.id },
+          update: {
+            id: details.id,
+            name: details.name,
+          },
           create: {
+            id: details.id,
             name: details.name,
           },
         });
@@ -127,7 +216,7 @@ export class MoveAilmentImportService {
   async importMoveAilment(): Promise<void> {
     this.logger.log('[MoveAilmentImportService] Starting move import...');
     try {
-      const moveAilmentDetails = await this.moveClient.listMoveAilments();
+      const moveAilmentDetails = await this.moveClient.listMoveAilments(0, 22);
 
       for (const ailmentRef of moveAilmentDetails.results) {
         const details = await this.moveClient.getMoveAilmentByName(
@@ -135,9 +224,13 @@ export class MoveAilmentImportService {
         );
 
         await this.prisma.movesAilment.upsert({
-          where: { name: details.name },
-          update: {},
+          where: { id: details.id },
+          update: {
+            id: details.id,
+            name: details.name,
+          },
           create: {
+            id: details.id,
             name: details.name,
           },
         });

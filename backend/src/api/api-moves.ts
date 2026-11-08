@@ -18,7 +18,7 @@ export class MoveImportService {
     this.logger.log('[MoveImportService] Starting move import...');
     try {
       let count = 0;
-      const maxMove = 901;
+      const maxMove = 901; // Pas d'attaques Gigamax
 
       // Trouver toutes les attaques par pagination
       for await (const moveSummary of this.moveClient.paginate('listMoves', {
@@ -33,13 +33,6 @@ export class MoveImportService {
           moveSummary.name,
         );
 
-        this.logger.log(
-          `Tentative d'upsert pour le move ID: ${moveDetails.id} (${moveDetails.name})`,
-        );
-
-        this.logger.log(
-          `Vérification - DamageClass: ${moveDetails.damage_class?.name}, Type: ${moveDetails.type?.name}, Ailment: ${moveDetails.meta?.ailment?.name}`,
-        );
         // Insertion de l'attaque en base de données
         await this.prisma.move.upsert({
           where: { id: moveDetails.id },

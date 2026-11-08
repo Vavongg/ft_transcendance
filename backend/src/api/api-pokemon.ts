@@ -25,7 +25,7 @@ export class ApiPokemonService {
   // Fonction de récupération && d'insertion des Pokémon
   async importPokemons(): Promise<void> {
     let count = 0;
-    const maxPokemons = 807;
+    const maxPokemons = 1025;
 
     try {
       this.logger.log('[ApiPokemonService] Starting Pokemon import...');

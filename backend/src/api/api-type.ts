@@ -65,11 +65,6 @@ export class TypeImportService {
             typeDetails.damage_relations.double_damage_to,
           );
 
-          // this.logger.debug(
-          //   `Type ${typeDetails.name} wants to connect to doubleDamageTo:`,
-          //   doubleDamageTo.map((t) => t.name),
-          // );
-
           const halfDamageTo = this.filterType(
             typeDetails.damage_relations.half_damage_to,
           );

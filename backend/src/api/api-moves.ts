@@ -14,12 +14,11 @@ export class MoveImportService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  
-private extractIdFromUrl(url: string): number {
-  const segments = url.split('/').filter(Boolean);
-  const lastSegment = segments.pop() ?? '0';
-  return parseInt(lastSegment, 10);
-}
+  private extractIdFromUrl(url: string): number {
+    const segments = url.split('/').filter(Boolean);
+    const lastSegment = segments.pop() ?? '0';
+    return parseInt(lastSegment, 10);
+  }
 
   async importMoves(): Promise<void> {
     this.logger.log('[MoveImportService] Starting move import...');
@@ -98,14 +97,14 @@ private extractIdFromUrl(url: string): number {
 
             type: moveDetails.type
               ? {
-                connectOrCreate: { 
-                 where : { name: moveDetails.type.name },
-                 create: {
-                  id: this.extractIdFromUrl(moveDetails.type.url),
-                  name: moveDetails.type.name,
-                 },
-                },
-              }
+                  connectOrCreate: {
+                    where: { name: moveDetails.type.name },
+                    create: {
+                      id: this.extractIdFromUrl(moveDetails.type.url),
+                      name: moveDetails.type.name,
+                    },
+                  },
+                }
               : undefined,
           },
           create: {
@@ -138,7 +137,8 @@ private extractIdFromUrl(url: string): number {
                       name: moveDetails.damage_class.name,
                     },
                   },
-                } : undefined,
+                }
+              : undefined,
 
             ailments:
               moveDetails.meta?.ailment &&
@@ -162,14 +162,14 @@ private extractIdFromUrl(url: string): number {
 
             type: moveDetails.type
               ? {
-                connectOrCreate: { 
-                 where : { name: moveDetails.type.name },
-                 create: {
-                  id: this.extractIdFromUrl(moveDetails.type.url),
-                  name: moveDetails.type.name,
-                 },
-                },
-              }
+                  connectOrCreate: {
+                    where: { name: moveDetails.type.name },
+                    create: {
+                      id: this.extractIdFromUrl(moveDetails.type.url),
+                      name: moveDetails.type.name,
+                    },
+                  },
+                }
               : undefined,
           },
         });

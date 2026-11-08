@@ -8,10 +8,7 @@ import {
 } from './api/api-moves';
 import { NatureImportService } from './api/api-nature';
 import { ApiPokemonService } from './api/api-pokemon';
-import {
-  TypeImportService,
-  TypeRelationImportService,
-} from './api/api-type';
+import { TypeImportService } from './api/api-type';
 import { ImportController } from './app.controller';
 import { ImportAllDataService } from './app.service';
 import { PrismaService } from './prisma/prisma.service';
@@ -29,7 +26,6 @@ import { PrismaService } from './prisma/prisma.service';
     AbilityImportService,
     NatureImportService,
     TypeImportService,
-    TypeRelationImportService,
   ],
 })
 export class AppModule {}

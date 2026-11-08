@@ -14,18 +14,27 @@ export class TypeImportService {
 
   constructor(private readonly prisma: PrismaService) {}
 
+  private filterType(relations: Array<{ name: string; url: string}>) {
+    return relations.filter((target) => {
+      const segments = target.url.split('/').filter(Boolean);
+      const lastSegment = segments.pop()?? '';
+      const id = parseInt(lastSegment, 10);
+      return id <= 18;
+    });
+  }
+
   async importTypes(): Promise<void> {
     this.logger.log('[TypeImportService] Starting abilities import...');
     try {
-      const typeDetails = await this.api.pokemon.listTypes(0, 18);
+      const typeList = await this.api.pokemon.listTypes(0, 18);
 
-      for (const typeEntry of typeDetails.results) {
+      for (const typeEntry of typeList.results) {
         const typeDetails = await this.api.pokemon.getTypeByName(
           typeEntry.name,
         );
 
         const spriteUrl =
-          typeDetails.sprites?.['generation-vii']?.['sun-moon']?.name_icon ||
+          typeDetails.sprites?.['generation-ix']?.['scarlet-violet']?.name_icon ||
           null;
 
         await this.prisma.type.upsert({
@@ -40,69 +49,46 @@ export class TypeImportService {
             spritesType: spriteUrl,
           },
         });
-      }
 
-      this.logger.log('[TypeImportService] Type successfully imported!');
-    } catch (error) {
-      this.logger.error('[TypeImportService] Error during type import', error);
-    }
-  }
-}
+        for (const typeEntry of typeList.results) {
+        const typeDetails = await this.api.pokemon.getTypeByName(typeEntry.name);
 
-@Injectable()
-export class TypeRelationImportService {
-  private readonly api = new MainClient();
-  private readonly logger = new Logger(TypeRelationImportService.name);
+        const doubleDamageTo = this.filterType(typeDetails.damage_relations.double_damage_to);
+        const halfDamageTo = this.filterType(typeDetails.damage_relations.half_damage_to);
+        const noDamageTo = this.filterType(typeDetails.damage_relations.no_damage_to);
 
-  constructor(private readonly prisma: PrismaService) {}
-
-  async importTypeRelationType(): Promise<void> {
-    this.logger.log('[TypeRelationImportService] Starting abilities import...');
-    try {
-      const relationDetails = await this.api.pokemon.listTypes();
-
-      for (const relationEntry of relationDetails.results) {
-        const typeDetails = await this.api.pokemon.getTypeByName(
-          relationEntry.name,
-        );
-
-        const doubleDamageTo = typeDetails.damage_relations.double_damage_to;
-
-        await this.prisma.type.upsert({
+        const doubleDamageFrom = this.filterType(typeDetails.damage_relations.double_damage_from);
+        const halfDamageFrom = this.filterType(typeDetails.damage_relations.half_damage_from);
+        const noDamageFrom = this.filterType(typeDetails.damage_relations.no_damage_from);
+        
+        await this.prisma.type.update({
           where: { id: typeDetails.id },
-          update: {
-            TypeRelation: {
-              connectOrCreate: doubleDamageTo.map((target) => ({
-                where: { name: target.name },
-                create: {
-                  name: target.name,
-                },
-              })),
+          data: {
+            doubleDamageTo: {
+              set: doubleDamageTo.map((target) => ({ name: target.name })),
             },
-          },
-          create: {
-            id: typeDetails.id,
-            name: typeDetails.name,
-            TypeRelation: {
-              connectOrCreate: doubleDamageTo.map((target) => ({
-                where: { name: target.name },
-                create: {
-                  name: target.name,
-                },
-              })),
+            halfDamageTo: {
+              set: halfDamageTo.map((target) => ({ name: target.name })),
+            },
+            noDamageTo: {
+              set: noDamageTo.map((target) => ({ name: target.name })),
+            },
+            doubleDamageFrom: {
+              set: doubleDamageFrom.map((target) => ({ name: target.name })),
+            },
+            halfDamageFrom: {
+              set: halfDamageFrom.map((target) => ({ name: target.name })),
+            },
+            noDamageFrom: {
+              set: noDamageFrom.map((target) => ({ name: target.name })),
             },
           },
         });
       }
-
-      this.logger.log(
-        '[TypeRelationImportService] Damage Relation Type successfully imported!',
-      );
+    }
+      this.logger.log('[TypeImportService] Type successfully imported!');
     } catch (error) {
-      this.logger.error(
-        '[TypeRelationImportService] Error during damage relation type import',
-        error,
-      );
+      this.logger.error('[TypeImportService] Error during type import', error);
     }
   }
 }

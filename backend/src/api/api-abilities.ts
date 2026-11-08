@@ -31,11 +31,14 @@ export class AbilityImportService {
 
         await this.prisma.pokemonAbility.upsert({
           where: { id: abilityDetails.id },
-          update: {},
+          update: {
+            name: abilityDetails.name,
+            effect: effectEntry?.short_effect ?? effectEntry?.effect ?? null,
+          },
           create: {
             id: abilityDetails.id,
             name: abilityDetails.name,
-            effect: effectEntry ? effectEntry.effect : null,
+            effect: effectEntry?.short_effect ?? effectEntry?.effect ?? null,
           },
         });
       }

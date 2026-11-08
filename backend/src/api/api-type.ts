@@ -14,30 +14,38 @@ export class TypeImportService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  private filterType(relations: Array<{ name: string; url: string }>) {
-    return relations.filter((target) => {
-      const segments = target.url.split('/').filter(Boolean);
-      const lastSegment = segments.pop() ?? '';
-      const id = parseInt(lastSegment, 10);
-      return id <= 18;
-    });
-  }
-
   private extractIdFromUrl(url: string): number {
     const segments = url.split('/').filter(Boolean);
     const lastSegment = segments.pop() ?? '0';
     return parseInt(lastSegment, 10);
   }
 
+  private formatConnectRelation(relations: { url: string }[] | undefined) {
+    if (!relations || relations?.length === 0) {
+      return { set: [] };
+    }
+
+    const ids = relations
+      .map((target) => this.extractIdFromUrl(target.url))
+      .filter((id) => id > 0 && id <= 18);
+
+    if (ids.length === 0) {
+      return { set: [] };
+    }
+    return { set: [], connect: ids.map((id) => ({ id })) };
+  }
+
   async importTypes(): Promise<void> {
     this.logger.log('[TypeImportService] Starting abilities import...');
     try {
       const typeList = await this.api.pokemon.listTypes(0, 18);
+      const allTypeDetails = [];
 
       for (const typeEntry of typeList.results) {
         const typeDetails = await this.api.pokemon.getTypeByName(
           typeEntry.name,
         );
+        allTypeDetails.push(typeDetails);
 
         const spriteUrl =
           typeDetails.sprites?.['generation-ix']?.['scarlet-violet']
@@ -55,69 +63,32 @@ export class TypeImportService {
             spritesType: spriteUrl,
           },
         });
+      }
 
-        for (const typeEntry of typeList.results) {
-          const typeDetails = await this.api.pokemon.getTypeByName(
-            typeEntry.name,
-          );
-
-          const doubleDamageTo = this.filterType(
-            typeDetails.damage_relations.double_damage_to,
-          );
-
-          const halfDamageTo = this.filterType(
-            typeDetails.damage_relations.half_damage_to,
-          );
-          const noDamageTo = this.filterType(
-            typeDetails.damage_relations.no_damage_to,
-          );
-
-          const doubleDamageFrom = this.filterType(
-            typeDetails.damage_relations.double_damage_from,
-          );
-          const halfDamageFrom = this.filterType(
-            typeDetails.damage_relations.half_damage_from,
-          );
-          const noDamageFrom = this.filterType(
-            typeDetails.damage_relations.no_damage_from,
-          );
-
-          await this.prisma.type.update({
-            where: { id: typeDetails.id },
-            data: {
-              doubleDamageTo: {
-                connect: doubleDamageTo.map((target) => ({
-                  id: this.extractIdFromUrl(target.url),
-                })),
-              },
-              halfDamageTo: {
-                connect: halfDamageTo.map((target) => ({
-                  id: this.extractIdFromUrl(target.url),
-                })),
-              },
-              noDamageTo: {
-                connect: noDamageTo.map((target) => ({
-                  id: this.extractIdFromUrl(target.url),
-                })),
-              },
-              doubleDamageFrom: {
-                connect: doubleDamageFrom.map((target) => ({
-                  id: this.extractIdFromUrl(target.url),
-                })),
-              },
-              halfDamageFrom: {
-                connect: halfDamageFrom.map((target) => ({
-                  id: this.extractIdFromUrl(target.url),
-                })),
-              },
-              noDamageFrom: {
-                connect: noDamageFrom.map((target) => ({
-                  id: this.extractIdFromUrl(target.url),
-                })),
-              },
-            },
-          });
-        }
+      for (const typeItem of allTypeDetails) {
+        await this.prisma.type.update({
+          where: { id: typeItem.id },
+          data: {
+            doubleDamageTo: this.formatConnectRelation(
+              typeItem.damage_relations.double_damage_to,
+            ),
+            doubleDamageFrom: this.formatConnectRelation(
+              typeItem.damage_relations.double_damage_from,
+            ),
+            halfDamageTo: this.formatConnectRelation(
+              typeItem.damage_relations.half_damage_to,
+            ),
+            halfDamageFrom: this.formatConnectRelation(
+              typeItem.damage_relations.half_damage_from,
+            ),
+            noDamageTo: this.formatConnectRelation(
+              typeItem.damage_relations.no_damage_to,
+            ),
+            noDamageFrom: this.formatConnectRelation(
+              typeItem.damage_relations.no_damage_from,
+            ),
+          },
+        });
       }
       this.logger.log('[TypeImportService] Type successfully imported!');
     } catch (error) {

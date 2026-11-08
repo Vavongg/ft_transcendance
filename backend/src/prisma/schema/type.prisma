@@ -1,0 +1,15 @@
+model Type {
+    id          Int     @id
+    name        String  @unique
+    spritesType String?
+
+    TypeRelation TypeRelation[] @relation("DamageRelationType")
+    pokemons     Pokemon[]      @relation("PokemonType")
+    moves        Move[]         @relation("MoveType")
+}
+
+model TypeRelation {
+    id   Int    @id @default(autoincrement())
+    name String @unique
+    type Type[] @relation("DamageRelationType")
+}

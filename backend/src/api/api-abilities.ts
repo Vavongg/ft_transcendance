@@ -3,26 +3,21 @@ import { MainClient } from 'pokenode-ts';
 import {
   Injectable,
   Logger,
-  OnApplicationBootstrap,
 } from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
-export class AbilityImportService implements OnApplicationBootstrap {
+export class AbilityImportService {
   private readonly api = new MainClient();
   private readonly logger = new Logger(AbilityImportService.name);
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async onApplicationBootstrap() {
-    await this.importAbility();
-  }
-
-  async importAbility() {
+  async importAbility(): Promise<void> {
+    this.logger.log('[AbilityImportService] Starting abilities import...');
     try {
-      this.logger.log('[AbilityImportService] Starting abilities import...');
-      const abilityDetail = await this.api.pokemon.listAbilities();
+      const abilityDetail = await this.api.pokemon.listAbilities(0, 500);
 
       for (const abilityEntry of abilityDetail.results) {
         const abilityDetails = await this.api.pokemon.getAbilityByName(
@@ -44,7 +39,7 @@ export class AbilityImportService implements OnApplicationBootstrap {
           },
         });
       }
-      
+
       this.logger.log(
         '[AbilityImportService] Abilities successfully imported!',
       );

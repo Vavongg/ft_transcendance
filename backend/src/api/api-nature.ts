@@ -3,28 +3,26 @@ import { MainClient } from 'pokenode-ts';
 import {
   Injectable,
   Logger,
-  OnApplicationBootstrap,
 } from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
-export class NatureImportService implements OnApplicationBootstrap {
+export class NatureImportService {
   private readonly api = new MainClient();
   private readonly logger = new Logger(NatureImportService.name);
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async onApplicationBootstrap() {
-    await this.importNatures();
-  }
-
-  async importNatures() {
+  async importNatures(): Promise<void> {
+    this.logger.log('[NatureImportService] Starting move import...');
     try {
-      const natureDetail = await this.api.pokemon.listNatures();
+      const natureDetail = await this.api.pokemon.listNatures(0, 100);
 
       for (const natureEntry of natureDetail.results) {
-        const natureDetails = await this.api.pokemon.getNatureByName(natureEntry.name);
+        const natureDetails = await this.api.pokemon.getNatureByName(
+          natureEntry.name,
+        );
 
         await this.prisma.nature.upsert({
           where: { id: natureDetails.id },
@@ -38,10 +36,10 @@ export class NatureImportService implements OnApplicationBootstrap {
         });
       }
 
-      this.logger.log('[NatureImportService] Natures imported successfully.');
+      this.logger.log('[NatureImportService] Natures successfully imported.');
     } catch (error) {
       this.logger.error(
-        '[NatureImportService] Error importing natures:',
+        '[NatureImportService] Error during nature import.',
         error,
       );
     }

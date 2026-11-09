@@ -1,15 +1,17 @@
 model Type {
-    id          Int     @id
-    name        String  @unique
+    id          Int       @id
+    name        String    @unique
     spritesType String?
+    pokemons    Pokemon[] @relation("PokemonType")
+    moves       Move[]    @relation("MoveType")
 
-    TypeRelation TypeRelation[] @relation("DamageRelationType")
-    pokemons     Pokemon[]      @relation("PokemonType")
-    moves        Move[]         @relation("MoveType")
-}
+    // Relations réflexives 
+    doubleDamageTo   Type[] @relation("DoubleDamage")
+    doubleDamageFrom Type[] @relation("DoubleDamage")
 
-model TypeRelation {
-    id   Int    @id @default(autoincrement())
-    name String @unique
-    type Type[] @relation("DamageRelationType")
+    halfDamageTo   Type[] @relation("HalfDamage")
+    halfDamageFrom Type[] @relation("HalfDamage")
+
+    noDamageTo   Type[] @relation("NoDamage")
+    noDamageFrom Type[] @relation("NoDamage")
 }

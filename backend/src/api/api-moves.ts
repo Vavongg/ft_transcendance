@@ -14,6 +14,12 @@ export class MoveImportService {
 
   constructor(private readonly prisma: PrismaService) {}
 
+  private extractIdFromUrl(url: string): number {
+    const segments = url.split('/').filter(Boolean);
+    const lastSegment = segments.pop() ?? '0';
+    return parseInt(lastSegment, 10);
+  }
+
   async importMoves(): Promise<void> {
     this.logger.log('[MoveImportService] Starting move import...');
     try {
@@ -58,11 +64,14 @@ export class MoveImportService {
 
             damageClass: moveDetails.damage_class
               ? {
-                  connect: [
-                    {
+                  connectOrCreate: {
+                    where: {
                       name: moveDetails.damage_class.name,
                     },
-                  ],
+                    create: {
+                      name: moveDetails.damage_class.name,
+                    },
+                  },
                 }
               : undefined,
 
@@ -77,17 +86,24 @@ export class MoveImportService {
                 'confusion',
               ].includes(moveDetails.meta.ailment.name)
                 ? {
-                    connect: [
-                      {
+                    connectOrCreate: {
+                      where: { name: moveDetails.meta.ailment.name },
+                      create: {
                         name: moveDetails.meta.ailment.name,
                       },
-                    ],
+                    },
                   }
                 : undefined,
 
             type: moveDetails.type
               ? {
-                  connect: [{ name: moveDetails.type.name }],
+                  connectOrCreate: {
+                    where: { name: moveDetails.type.name },
+                    create: {
+                      id: this.extractIdFromUrl(moveDetails.type.url),
+                      name: moveDetails.type.name,
+                    },
+                  },
                 }
               : undefined,
           },
@@ -113,11 +129,14 @@ export class MoveImportService {
 
             damageClass: moveDetails.damage_class
               ? {
-                  connect: [
-                    {
+                  connectOrCreate: {
+                    where: {
                       name: moveDetails.damage_class.name,
                     },
-                  ],
+                    create: {
+                      name: moveDetails.damage_class.name,
+                    },
+                  },
                 }
               : undefined,
 
@@ -132,17 +151,24 @@ export class MoveImportService {
                 'confusion',
               ].includes(moveDetails.meta.ailment.name)
                 ? {
-                    connect: [
-                      {
+                    connectOrCreate: {
+                      where: { name: moveDetails.meta.ailment.name },
+                      create: {
                         name: moveDetails.meta.ailment.name,
                       },
-                    ],
+                    },
                   }
                 : undefined,
 
             type: moveDetails.type
               ? {
-                  connect: [{ name: moveDetails.type.name }],
+                  connectOrCreate: {
+                    where: { name: moveDetails.type.name },
+                    create: {
+                      id: this.extractIdFromUrl(moveDetails.type.url),
+                      name: moveDetails.type.name,
+                    },
+                  },
                 }
               : undefined,
           },

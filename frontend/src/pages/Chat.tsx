@@ -1,6 +1,10 @@
 import { useState, useEffect, useRef, type FormEvent } from 'react'
+import { io, type Socket } from 'socket.io-client'
 
-type Message = { id: number; author: string; text: string }
+type Message = { id: number; sender: string; content: string; createdAt: string }
+// Identité temporaire de dev : sera remplacée par l'authentification de Lyris.
+const username = new URLSearchParams(window.location.search).get('as') ?? 'Spheal'
+const userId = username === 'Oshawott' ? 9002 : 9001
 
 // Conteneur du panneau de chat latéral.
 export default function ChatPanel() {
@@ -13,14 +17,10 @@ export default function ChatPanel() {
 
 // Gère les messages de démonstration et le brouillon du chat général.
  function GeneralChat() {
-    const [messages, setMessages] = useState<Message[]>([
-  { id: 1, author: 'Spheal', text: 'BaaaAAaAAa !' },
-  { id: 2, author: 'Victini', text: 'Tiniiii ✌️ !' },
-  { id: 3, author: 'Oshawott', text: 'Oshaaaa !' },
-  { id: 4, author: 'Snorlax', text: 'zzZZzzZ !' },
-  { id: 5, author: 'Mimikyu', text: '✨-✨!' },
-    ]);
+    const [messages, setMessages] = useState<Message[]>([]);
     const [draft, setDraft] = useState('');
+    const [error, setError] = useState('');
+    const socketRef = useRef<Socket | null>(null);
 
     //pour qu'on ramene tjr l'utilisateur au bas du chat s'il y a un new msg
     const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -31,18 +31,31 @@ export default function ChatPanel() {
         scrollToBottom();
     }, [messages]);
 
-    // Ajoute les messages à l'état local ; la persistance serveur viendra avec Socket.IO.
+    // TMP TESTER
+    useEffect(() => {
+        const socket = io('http://localhost:3000', { auth: { userId, username } });
+        socketRef.current = socket;
+
+        socket.on('connect', () => console.log('socket connecté', socket.id));
+        socket.on('chat:history', (history: Message[]) => setMessages(history));
+        socket.on('chat:message', (message: Message) => {
+            setMessages((current) => [...current, message]);
+        });
+        socket.on('chat:error', (err: { message: string }) => setError(err.message));
+
+        return () => { 
+            socket.disconnect();
+            socketRef.current = null;
+        };
+    }, []); // le [] dit a React de ne pas relancer ce bloc meme si l'user tape du texte
+
+    // Ajoute les messages à l'état local ; msg enregistré dans le backend via Gateway
     const handleSendMessage = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault(); //evite que ca refresh apres chaque new msg
-        const text = draft.trim();
-        if (!text)
+        const content = draft.trim();
+        if (!content)
             return;
-        const newMessage = {
-            id : Date.now(),
-            author : 'GM',
-            text : text,
-        }
-        setMessages((current) => [...current, newMessage]);
+        socketRef.current?.emit('chat:send', { content });
         setDraft('')
     };
   return (
@@ -52,12 +65,12 @@ export default function ChatPanel() {
       <div className="my-4 min-h-0 flex-1 space-y-3 overflow-y-auto">
         {messages.map((message) => (
             <p key={message.id}>
-            <strong>{message.author} :</strong> {message.text}
+            <strong>{message.sender} :</strong> {message.content}
             </p>
         ))}
         <div ref={messagesEndRef}/>
       </div >
-
+      {error && <p className="mb-2 text-red-400">{error}</p>}
       <form className="flex gap-2" onSubmit={handleSendMessage}>
         <input
           aria-label="Ton message"

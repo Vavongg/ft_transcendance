@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ChatModule } from './chat/chat.module';
 
 import { AbilityImportService } from './api/api-abilities';
 import {
@@ -14,7 +15,7 @@ import { ImportAllDataService } from './app.service';
 import { PrismaService } from './prisma/prisma.service';
 
 @Module({
-  imports: [],
+  imports: [ChatModule],
   controllers: [ImportController],
   providers: [
     ImportAllDataService,

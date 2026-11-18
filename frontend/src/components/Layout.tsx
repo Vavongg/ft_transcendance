@@ -9,7 +9,8 @@ export default function Layout() {
         <nav className="flex gap-4 p-4">
           <NavLink to="/">Accueil</NavLink>
           <NavLink to="/login">Connexion</NavLink>
-          <NavLink to="/profile">Profil</NavLink>
+          <NavLink to="/signin">Inscription</NavLink>
+          <NavLink to="/profile">Profile</NavLink>
         </nav>
       </header>
       <div className="mx-auto mt-6 flex h-[80vh] w-full max-w-7xl gap-4 px-6">

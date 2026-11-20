@@ -10,7 +10,9 @@ import {
 import {Server, Socket} from 'socket.io';
 import {CreateMessageDto } from './dto/create-message.dto';
 import { ChatService } from './chat.service';
+import { UsePipes, ValidationPipe } from '@nestjs/common';
 
+@UsePipes(new ValidationPipe({ whitelist: true, transform: true }))
 @WebSocketGateway({cors: {origin:'*'}})
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect{
     constructor (private ChatService: ChatService){}
@@ -24,14 +26,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect{
             return;
         }
         client.data.user = { userId, username };
-        client.join('general');
+        void client.join('general');
 
         console.log(`Client connecté : ${client.id} ${username}`);
         client.emit('chat:history', this.ChatService.history());
         this.server.to('general').emit('notification', `${username} a rejoint le chat`);
     }
     handleDisconnect(client: Socket) {
-        const username = client.data.user?.username ?? client.id;
+        const username = client.data.user?.username ?? client.id; // ?. pour qu'il sort undefined si l'user est deco, ?? pour si la gauche = NULL || undefined prend l'element a gauche
         console.log(`Client déconnecté : ${username}`);
         this.server.to('general').emit('notification', `${username} a quitté le chat`);
     }
@@ -40,7 +42,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect{
         @ConnectedSocket() client: Socket,
         @MessageBody() dto: CreateMessageDto
     ){
-        const content = dto.content?.trim();
+        const content = dto.content?.trim();// si content = UNDEFINE || NULL, arret net de JS et envoie undefined.  .trim() pour eviter les espaces blancs
         if (!content || content.length > 1000) {
             client.emit('chat:error', {
                 code: 'INVALID_MESSAGE',

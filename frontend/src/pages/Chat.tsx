@@ -20,6 +20,7 @@ export default function ChatPanel() {
     const [messages, setMessages] = useState<Message[]>([]);
     const [draft, setDraft] = useState('');
     const [error, setError] = useState('');
+    const [connected, setConnected] = useState(false);
     const socketRef = useRef<Socket | null>(null);
 
     //pour qu'on ramene tjr l'utilisateur au bas du chat s'il y a un new msg
@@ -33,16 +34,19 @@ export default function ChatPanel() {
 
     // TMP TESTER
     useEffect(() => {
-        const socket = io('http://localhost:3000', { auth: { userId, username } });
+        const socket = io({ auth: { userId, username } });
         socketRef.current = socket;
+        //if (import.meta.env.DEV) Object.assign(window, { socket }); // [ DEBUG ] rendre le socket accessible sur la console du navigateur
 
-        socket.on('connect', () => console.log('socket connecté', socket.id));
+        socket.on('connect', () => setConnected(true));
+        socket.on('disconnect', () => setConnected(false));
+        socket.on('connect_error', () => setConnected(false));
         socket.on('chat:history', (history: Message[]) => setMessages(history));
         socket.on('chat:message', (message: Message) => {
             setMessages((current) => [...current, message]);
         });
         socket.on('chat:error', (err: { message: string }) => setError(err.message));
-
+        socket.on('exception', () => setError('Message invalide'));
         return () => { 
             socket.disconnect();
             socketRef.current = null;
@@ -57,6 +61,7 @@ export default function ChatPanel() {
             return;
         socketRef.current?.emit('chat:send', { content });
         setDraft('')
+        setError('');
     };
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -78,11 +83,11 @@ export default function ChatPanel() {
           placeholder="Write your message..."
           onChange={(e) => setDraft(e.target.value)}
           value = {draft}
+          maxLength={1000}
         />
-        <button type="submit" className="rounded bg-white/10 px-3 py-2">
+        <button type="submit" disabled={!connected} className="rounded bg-white/10 px-3 py-2">
           →
         </button>
-
       </form>
     </div>
   )

@@ -4,3 +4,4 @@
 *.tsbuildinfo
 **/gitattributes
 **/.vscode/*
+.DS_Store

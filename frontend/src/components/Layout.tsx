@@ -9,7 +9,7 @@ export default function Layout() {
         <nav className="flex gap-4 p-4">
           <NavLink to="/">Accueil</NavLink>
           <NavLink to="/login">Connexion</NavLink>
-          <NavLink to="/signin">Inscription</NavLink>
+          <NavLink to="/signup">Inscription</NavLink>
           <NavLink to="/profile">Profile</NavLink>
         </nav>
       </header>
